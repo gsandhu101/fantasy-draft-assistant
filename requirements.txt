@@ -1,0 +1,7 @@
+pandas
+streamlit
+tweepy
+sqlalchemy
+python-dotenv
+vaderSentiment
+requests

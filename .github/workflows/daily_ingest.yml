@@ -1,0 +1,37 @@
+name: Daily Data Ingestion
+
+on:
+  schedule:
+    - cron: '0 17 * * *' # 10am PST (UTC-7)
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Run Twitter ingestion
+        env:
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+        run: |
+          python ingest/twitter_ingest.py
+      - name: Run Sports ingestion
+        env:
+          SPORTS_API_KEY: ${{ secrets.SPORTS_API_KEY }}
+        run: |
+          python ingest/sports_ingest.py
+      - name: Commit and push updated data
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add sample_data/*.csv sample_data/last_updated.txt
+          git commit -m "Daily data update"
+          git push
